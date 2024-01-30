@@ -23,8 +23,8 @@ const MongoClient = require('mongodb').MongoClient;
 
 // err - this just means an error will be shown to the client if the server can't be seen
 let db;
-MongoClient.connect('mongodb+srv://ElijahLegacy:uA1yXRRQfvgScQox@cluster0.mkhsgyb.mongodb.net?retryWrites=true&w=majority', (err, client) => {
-    db = client.db('webstore')
+MongoClient.connect('mongodb+srv://freddy:7f7jA6dUicg5R51c@mycluster.duiazwk.mongodb.net/?retryWrites=true&w=majority', (err, client) => {
+    db = client.db('coursework')
 })
 
 // '/' use when first time being used, usually its the route we're using
