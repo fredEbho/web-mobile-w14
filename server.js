@@ -23,7 +23,7 @@ const MongoClient = require('mongodb').MongoClient;
 
 // err - this just means an error will be shown to the client if the server can't be seen
 let db;
-MongoClient.connect('mongodb+srv://ElijahLegacy:uA1yXRRQfvgScQox@cluster0.mkhsgyb.mongodb.net', (err, client) => {
+MongoClient.connect('mongodb+srv://ElijahLegacy:uA1yXRRQfvgScQox@cluster0.mkhsgyb.mongodb.net?retryWrites=true&w=majority', (err, client) => {
     db = client.db('webstore')
 })
 
