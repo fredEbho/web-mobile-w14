@@ -1,13 +1,14 @@
 //import dependencies
 const express = require('express');
-// bodyParser is not needed because the latest version express can directly pass data 
+// bodyParser is not needed because the latest version express can directly pass data
 // create an Express.js instance
 const app = express();
+let port = process.env.PORT ?? 3000
 
 // config Express.js
 // Cross-Origin Resource Sharing (CORS) Allows the server to respond to ANY request indicated by '*'
 app.use(express.json())
-app.set('port', 3000)
+app.set('port', port)
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -26,7 +27,7 @@ MongoClient.connect('mongodb+srv://ElijahLegacy:uA1yXRRQfvgScQox@cluster0.mkhsgy
     db = client.db('webstore')
 })
 
-// '/' use when first time being used, usually its the route we're using 
+// '/' use when first time being used, usually its the route we're using
 // displays message for root path to show that API is working
 app.get('/', (req, res, next) => {
     res.send('Select a collection, e.g., /collection/messages')
@@ -41,7 +42,7 @@ app.param('collectionName', (req, res,next, collectionName) => {
 
 // /collection/:collectionName is the route
 // find is like a cursor to find the data
-// e is error 
+// e is error
 app.get('/collection/:collectionName', (req, res, next) => {
     req.collection.find({}).toArray((e, results) => {
         if (e) return next(e)
@@ -51,7 +52,7 @@ app.get('/collection/:collectionName', (req, res, next) => {
 })
 
 // ops unique object identifier in postman
-// req.body is for the postman when an object is being inserted 
+// req.body is for the postman when an object is being inserted
 app.post('/collection/:collectionName', (req, res, next) => {
     req.collection.insert(req.body, (e, results) => {
         if (e) return next(e)
@@ -101,6 +102,6 @@ app.delete('/collection/:collectionName/:id', (req, res, next) => {
 })
 
 // cURL - Client URL
-app.listen(3000, () => {
+app.listen(port, () => {
     console.log('express is running on port 3000')
 })
