@@ -22,17 +22,15 @@ app.use((req, res, next) => {
 
 app.use('/public', express.static('public'))
 
-app.use(function (request, response,next) {
-    let filePath = path.join(__dirname,"public",request.url)
+app.use(function (request, response, next) {
+    let filePath = path.join(__dirname, "public", request.url)
     fs.stat(filePath, function (err, fileInfo) {
-        if (err && request.url.includes('public')){
+        if (err && request.url.includes('public')) {
             response.status(404);
-            response.send("File not found! - "+err);
-        }
-        else if (!err && fileInfo.isFile()){
+            response.send("File not found! - " + err);
+        } else if (!err && fileInfo.isFile()) {
             response.sendFile(filePath);
-        }
-        else {
+        } else {
             next();
         }
 
@@ -56,7 +54,7 @@ app.get('/', (req, res, next) => {
 
 // app.param() [parameter] middleware allows to do something every time there is this value in the URL pattern on the request handler
 // get the collection name
-app.param('collectionName', (req, res,next, collectionName) => {
+app.param('collectionName', (req, res, next, collectionName) => {
     req.collection = db.collection(collectionName)
     return next()
 })
@@ -65,32 +63,51 @@ app.param('collectionName', (req, res,next, collectionName) => {
 // find is like a cursor to find the data
 // e is error
 app.get('/collection/:collectionName', (req, res, next) => {
-    let findParams = {}
-    if (req.query.search != null && req.query.search.length > 0)
-        findParams = {$or: [{subject: `/${req.query.search}/`},{location: `/${req.query.search}/`}]}
-    req.collection.find(findParams).toArray((e, results) => {
-        if (e) return next(e)
-        res.send(results)
+    let searchQuery = req.query.search;
+    if (searchQuery != null && searchQuery > 0) {
+        let pipeline = [
+            {
+                $search: {
+                    index: 'user_search',
+                    $text: {
+                        query: searchQuery,
+                        path: ['subject', 'location'],
+                        fuzzy: {}
+                    }
+                }
+            }
+        ]
+        req.collection.aggregate(pipeline).toArray((e, results) => {
+                if (e) return next(e)
+                res.send(results)
+            }
+        )
     }
-    )
+    else{
+        req.collection.find({}).toArray((e, results) => {
+                if (e) return next(e)
+                res.send(results)
+            }
+        )
+    }
 })
 
 // ops unique object identifier in postman
 // req.body is for the postman when an object is being inserted
 app.post('/collection/:collectionName', (req, res, next) => {
     req.collection.insert(req.body, (e, results) => {
-        if (e) return next(e)
-        res.send(results.ops)
-    }
+            if (e) return next(e)
+            res.send(results.ops)
+        }
     )
 })
 
 const ObjectID = require('mongodb').ObjectID;
 app.get('/collection/:collectionName/:id', (req, res, next) => {
-    req.collection.findOne({ _id: new ObjectID(req.params.id) }, (e, results) => {
-        if (e) return next(e)
-        res.send(results)
-    }
+    req.collection.findOne({_id: new ObjectID(req.params.id)}, (e, results) => {
+            if (e) return next(e)
+            res.send(results)
+        }
     )
 })
 
@@ -104,12 +121,12 @@ app.put('/collection/:collectionName/:id', (req, res, next) => {
         },
         {
             // tells mongodb to wait before callback function to process only 1 item
-            safe: true, multi : false
+            safe: true, multi: false
         },
         (e, result) => {
-        if (e) return next(e)
-        res.send((result.result.n === 1) ? {msg: 'success'} : {msg: 'error'})
-    }
+            if (e) return next(e)
+            res.send((result.result.n === 1) ? {msg: 'success'} : {msg: 'error'})
+        }
     )
 })
 
@@ -119,9 +136,9 @@ app.delete('/collection/:collectionName/:id', (req, res, next) => {
             _id: ObjectID(req.params.id)
         },
         (e, result) => {
-        if (e) return next(e)
-        res.send((result.result.n === 1) ? {msg: 'success'} : {msg: 'error'})
-    }
+            if (e) return next(e)
+            res.send((result.result.n === 1) ? {msg: 'success'} : {msg: 'error'})
+        }
     )
 })
 
