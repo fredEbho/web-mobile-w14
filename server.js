@@ -67,7 +67,7 @@ app.param('collectionName', (req, res,next, collectionName) => {
 app.get('/collection/:collectionName', (req, res, next) => {
     let findParams = {}
     if (req.query.search != null && req.query.search.length > 0)
-        findParams = {$or: [{title: req.query.search},{location: req.query.search}]}
+        findParams = {$or: [{subject: `/req.query.search/`},{location: `/req.query.search/`}]}
     req.collection.find(findParams).toArray((e, results) => {
         if (e) return next(e)
         res.send(results)
