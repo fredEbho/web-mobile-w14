@@ -64,7 +64,7 @@ app.param('collectionName', (req, res, next, collectionName) => {
 // e is error
 app.get('/collection/:collectionName', (req, res, next) => {
     let searchQuery = req.query.search;
-    if (searchQuery != null && searchQuery > 0) {
+    if (searchQuery != null && searchQuery.length > 0) {
         let pipeline = [
             {
                 $search: {
