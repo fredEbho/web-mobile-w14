@@ -69,10 +69,11 @@ app.get('/collection/:collectionName', (req, res, next) => {
             {
                 $search: {
                     index: 'user_search',
-                    text: {
+                    autocomplete: {
                         query: searchQuery,
                         path: ['subject', 'location'],
-                        fuzzy: {}
+                        fuzzy: {},
+                        tokenOrder: 'any'
                     }
                 }
             }
