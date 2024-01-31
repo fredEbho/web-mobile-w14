@@ -69,12 +69,22 @@ app.get('/collection/:collectionName', (req, res, next) => {
             {
                 $search: {
                     index: 'user_search',
-                    autocomplete: {
-                        query: searchQuery,
-                        path: ['subject', 'location'],
-                        fuzzy: {},
-                        tokenOrder: 'any'
-                    }
+                    compound: {
+                        should: [
+                            {
+                                autocomplete: {
+                                    query: searchQuery,
+                                    path: 'subject',
+                                },
+                            },
+                            {
+                                autocomplete: {
+                                    query: searchQuery,
+                                    path: 'location',
+                                },
+                            },
+                        ],
+                    },
                 }
             }
         ]
