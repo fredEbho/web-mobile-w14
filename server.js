@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 app.use('/public', express.static('public'))
 
 app.use(function (request, response,next) {
-    let filePath = path.join(__dirname,"static",request.url)
+    let filePath = path.join(__dirname,"public",request.url)
     fs.stat(filePath, function (err, fileInfo) {
         if (err){
             response.status(404);
