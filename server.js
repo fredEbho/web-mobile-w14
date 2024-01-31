@@ -1,5 +1,7 @@
 //import dependencies
 const express = require('express');
+const path = require("path");
+const fs = require("fs");
 // bodyParser is not needed because the latest version express can directly pass data
 // create an Express.js instance
 const app = express();
@@ -16,6 +18,25 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
 
     next();
+})
+
+app.use('/public', express.static('public'))
+
+app.use(function (request, response,next) {
+    let filePath = path.join(__dirname,"static",request.url)
+    fs.stat(filePath, function (err, fileInfo) {
+        if (err){
+            response.status(404);
+            response.send("File not found! - "+err);
+        }
+        else if (fileInfo.isFile()){
+            response.sendFile(filePath);
+        }
+        else {
+            next();
+        }
+
+    })
 })
 
 // connect MongoDB
@@ -44,7 +65,10 @@ app.param('collectionName', (req, res,next, collectionName) => {
 // find is like a cursor to find the data
 // e is error
 app.get('/collection/:collectionName', (req, res, next) => {
-    req.collection.find({}).toArray((e, results) => {
+    let findParams = {}
+    if (req.query.search != null && req.query.search.length > 0)
+        findParams = {$or: [{title: req.query.search},{location: req.query.search}]}
+    req.collection.find(findParams).toArray((e, results) => {
         if (e) return next(e)
         res.send(results)
     }
