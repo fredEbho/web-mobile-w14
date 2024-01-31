@@ -25,11 +25,11 @@ app.use('/public', express.static('public'))
 app.use(function (request, response,next) {
     let filePath = path.join(__dirname,"public",request.url)
     fs.stat(filePath, function (err, fileInfo) {
-        if (err){
+        if (err && request.url.includes('public')){
             response.status(404);
             response.send("File not found! - "+err);
         }
-        else if (fileInfo.isFile()){
+        else if (!err && fileInfo.isFile()){
             response.sendFile(filePath);
         }
         else {
