@@ -69,7 +69,7 @@ app.get('/collection/:collectionName', (req, res, next) => {
             {
                 $search: {
                     index: 'user_search',
-                    $text: {
+                    text: {
                         query: searchQuery,
                         path: ['subject', 'location'],
                         fuzzy: {}
