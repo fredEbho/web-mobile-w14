@@ -64,43 +64,19 @@ app.param('collectionName', (req, res, next, collectionName) => {
 // e is error
 app.get('/collection/:collectionName', (req, res, next) => {
     let searchQuery = req.query.search;
+    let collectionQuery;
     if (searchQuery != null && searchQuery.length > 0) {
-        let pipeline = [
-            {
-                $search: {
-                    index: 'user_search',
-                    compound: {
-                        should: [
-                            {
-                                autocomplete: {
-                                    query: searchQuery,
-                                    path: 'subject',
-                                },
-                            },
-                            {
-                                autocomplete: {
-                                    query: searchQuery,
-                                    path: 'location',
-                                },
-                            },
-                        ],
-                    },
-                }
-            }
-        ]
-        req.collection.aggregate(pipeline).toArray((e, results) => {
-                if (e) return next(e)
-                res.send(results)
-            }
-        )
+        collectionQuery = req.collection.aggregate(createSearchPipeline(searchQuery));
     }
     else{
-        req.collection.find({}).toArray((e, results) => {
-                if (e) return next(e)
-                res.send(results)
-            }
-        )
+        collectionQuery = req.collection.find({});
     }
+
+    collectionQuery.toArray((e, results) => {
+            if (e) return next(e)
+            res.send(results)
+        }
+    )
 })
 
 // ops unique object identifier in postman
@@ -128,7 +104,9 @@ app.put('/collection/:collectionName/:id', (req, res, next) => {
             _id: new ObjectID(req.params.id)
         },
         {
-            $set: req.body
+            $inc: {
+                spaces: -1
+            }
         },
         {
             // tells mongodb to wait before callback function to process only 1 item
@@ -157,3 +135,32 @@ app.delete('/collection/:collectionName/:id', (req, res, next) => {
 app.listen(port, () => {
     console.log('express is running on port 3000')
 })
+
+
+
+function createSearchPipeline(searchQuery) {
+    return [
+        {
+            $search: {
+                index: 'user_search',
+                compound: {
+                    should: [
+                        {
+                            autocomplete: {
+                                query: searchQuery,
+                                path: 'subject',
+                            },
+                        },
+                        {
+                            autocomplete: {
+                                query: searchQuery,
+                                path: 'location',
+                            },
+                        },
+                    ],
+                },
+            }
+        }
+    ]
+
+}
